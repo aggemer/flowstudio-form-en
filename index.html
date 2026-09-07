@@ -508,17 +508,25 @@
       fetch(APPS_SCRIPT_URL + '?' + params.toString(), { method: 'GET', mode: 'no-cors' }).catch(() => {});
 
       if (hasSig) {
+        const sigPayload = JSON.stringify({
+          action: 'signature',
+          onoma: onoma,
+          date: dateStr.replace(/[/:, ]/g, '_'),
+          sig: canvas.toDataURL('image/png')
+        });
+        // Wait 4 seconds for Drive file to be created before sending signature
+        await new Promise(resolve => setTimeout(resolve, 4000));
         fetch(APPS_SCRIPT_URL, {
           method: 'POST', mode: 'no-cors',
           headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify({ action: 'signature', onoma: onoma, date: dateStr.replace(/[/:, ]/g, '_'), sig: canvas.toDataURL('image/png') })
+          body: sigPayload
         }).catch(() => {});
+      } else {
+        await new Promise(resolve => setTimeout(resolve, 1500));
       }
 
-      setTimeout(() => {
-        showToast('✅ Successfully uploaded to Drive!', false);
-        btn.textContent = '✅ Submitted!';
-      }, 1500);
+      showToast('✅ Successfully uploaded to Drive!', false);
+      btn.textContent = '✅ Submitted!';
 
     } catch(err) {
       console.error(err);
