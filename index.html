@@ -43,15 +43,125 @@
 
   .cb-grid { display: grid; border: 1px solid #d0d0e8; border-radius: 6px; overflow: hidden; margin-bottom: 6px; }
   .cb-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
-  .cb-grid.cols-5 { grid-template-columns: repeat(5, 1fr); }
 
   .cb-cell { display: flex; align-items: flex-start; gap: 6px; padding: 6px 8px; border-right: 1px solid #d0d0e8; border-bottom: 1px solid #d0d0e8; cursor: pointer; font-size: 11px; line-height: 1.35; }
   .cb-cell:hover { background: #f0f0fa; }
   .cb-cell input[type="checkbox"] { margin-top: 2px; flex-shrink: 0; width: 13px; height: 13px; accent-color: #4a4a8a; }
   .cols-4 .cb-cell:nth-child(4n) { border-right: none; }
-  .cols-5 .cb-cell:nth-child(5n) { border-right: none; }
   .cols-4 .cb-cell:nth-last-child(-n+4) { border-bottom: none; }
-  .cols-5 .cb-cell:nth-last-child(-n+5) { border-bottom: none; }
+
+  /* Sections 2 & 3 (Autoimmune/Neurological, Musculoskeletal): one canonical
+     checkbox list per section. The DOM order is the natural reading order
+     (sensible top-to-bottom, left-to-right in 2 columns); a plain 2-column
+     grid at every width by default, borders drawn with border-top/left only
+     so an odd item count never needs special-casing except the very last,
+     unpaired item, which spans both columns for a clean closing edge.
+     At desktop widths this is overridden with an explicit grid-area per
+     item, remapping the same list into the 5-column thematic layout that
+     matches the printed reference sheet — using a gap + background-color
+     line trick there instead, since that grid has no empty cells. */
+  #grid-p2, #grid-p3 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    border: 1px solid #d0d0e8;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 8px;
+    /* Keep the whole table together when this page is paginated (Word/PDF
+       export, print preview). break-inside:avoid on the cells alone only
+       stops a break from landing INSIDE one row — it doesn't stop one from
+       landing BETWEEN rows, which was still free to fall right before the
+       final, full-width item and strand it away from the rest of the table
+       with its border left open. Avoiding a break inside the container
+       itself keeps every row, including that last one, on the same page. */
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  #grid-p2 .cb-cell, #grid-p3 .cb-cell {
+    border-top: 1px solid #d0d0e8;
+    border-left: 1px solid #d0d0e8;
+    border-right: none;
+    border-bottom: none;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  #grid-p2 .cb-cell:nth-child(-n+2), #grid-p3 .cb-cell:nth-child(-n+2) { border-top: none; }
+  #grid-p2 .cb-cell:nth-child(2n+1), #grid-p3 .cb-cell:nth-child(2n+1) { border-left: none; }
+  /* The full-width span for a lone trailing item is mobile-only (moved into
+     the max-width:700px query below): at desktop widths this selector's
+     specificity would otherwise beat the plain nth-child(N) grid-area rule
+     that correctly places that same item within the 5-column layout. */
+
+  @media (min-width: 701px) {
+    #grid-p2, #grid-p3 {
+      grid-template-columns: repeat(5, 1fr);
+      gap: 1px;
+      background: #d0d0e8;
+    }
+    #grid-p2 .cb-cell, #grid-p3 .cb-cell { background: #fff; border: none; }
+
+    #grid-p2 .cb-cell:nth-child(1)  { grid-area: 1 / 1; } /* Autoimmune Thyroid Diseases */
+    #grid-p2 .cb-cell:nth-child(2)  { grid-area: 3 / 3; } /* Rheumatoid Arthritis */
+    #grid-p2 .cb-cell:nth-child(3)  { grid-area: 2 / 1; } /* Multiple Sclerosis (MS) */
+    #grid-p2 .cb-cell:nth-child(4)  { grid-area: 4 / 3; } /* Crohn's Disease */
+    #grid-p2 .cb-cell:nth-child(5)  { grid-area: 3 / 1; } /* Myasthenia Gravis */
+    #grid-p2 .cb-cell:nth-child(6)  { grid-area: 5 / 3; } /* Ulcerative Colitis */
+    #grid-p2 .cb-cell:nth-child(7)  { grid-area: 4 / 1; } /* Addison's Disease */
+    #grid-p2 .cb-cell:nth-child(8)  { grid-area: 1 / 4; } /* Stroke */
+    #grid-p2 .cb-cell:nth-child(9)  { grid-area: 5 / 1; } /* Autoimmune Hepatitis */
+    #grid-p2 .cb-cell:nth-child(10) { grid-area: 2 / 4; } /* Parkinson's Disease */
+    #grid-p2 .cb-cell:nth-child(11) { grid-area: 1 / 2; } /* Systemic Lupus Erythematosus (SLE) */
+    #grid-p2 .cb-cell:nth-child(12) { grid-area: 3 / 4; } /* Alzheimer's Disease */
+    #grid-p2 .cb-cell:nth-child(13) { grid-area: 2 / 2; } /* Scleroderma */
+    #grid-p2 .cb-cell:nth-child(14) { grid-area: 4 / 4; } /* Dementia */
+    #grid-p2 .cb-cell:nth-child(15) { grid-area: 3 / 2; } /* Raynaud's Syndrome */
+    #grid-p2 .cb-cell:nth-child(16) { grid-area: 5 / 4; } /* Seizures / Epilepsy */
+    #grid-p2 .cb-cell:nth-child(17) { grid-area: 4 / 2; } /* Sjögren's Syndrome */
+    #grid-p2 .cb-cell:nth-child(18) { grid-area: 1 / 5; } /* Neuralgia */
+    #grid-p2 .cb-cell:nth-child(19) { grid-area: 5 / 2; } /* Vitiligo */
+    #grid-p2 .cb-cell:nth-child(20) { grid-area: 2 / 5; } /* Fibromyalgia */
+    #grid-p2 .cb-cell:nth-child(21) { grid-area: 1 / 3; } /* Psoriasis */
+    #grid-p2 .cb-cell:nth-child(22) { grid-area: 3 / 5; } /* Migraines */
+    #grid-p2 .cb-cell:nth-child(23) { grid-area: 2 / 3; } /* Psoriatic Arthritis */
+    #grid-p2 .cb-cell:nth-child(24) { grid-area: 4 / 5; } /* Vertigo / Dizziness */
+    #grid-p2 .cb-cell:nth-child(25) { grid-area: 5 / 5; } /* Other (Please specify) */
+
+    #grid-p3 .cb-cell:nth-child(1)  { grid-area: 1 / 1; } /* Cervicalgia / Neck Pain */
+    #grid-p3 .cb-cell:nth-child(2)  { grid-area: 4 / 3; } /* Trochanteric Bursitis */
+    #grid-p3 .cb-cell:nth-child(3)  { grid-area: 2 / 1; } /* Lumbar Pain / Low Back Pain */
+    #grid-p3 .cb-cell:nth-child(4)  { grid-area: 5 / 3; } /* Osteoarthritis */
+    #grid-p3 .cb-cell:nth-child(5)  { grid-area: 3 / 1; } /* Sciatica */
+    #grid-p3 .cb-cell:nth-child(6)  { grid-area: 6 / 3; } /* Joint Replacement / Arthroplasty */
+    #grid-p3 .cb-cell:nth-child(7)  { grid-area: 4 / 1; } /* Hernia (Disc Herniation, Inguinal Hernia) */
+    #grid-p3 .cb-cell:nth-child(8)  { grid-area: 7 / 3; } /* Chondropathy */
+    #grid-p3 .cb-cell:nth-child(9)  { grid-area: 5 / 1; } /* Spinal Stenosis */
+    #grid-p3 .cb-cell:nth-child(10) { grid-area: 1 / 4; } /* Baker's Cyst */
+    #grid-p3 .cb-cell:nth-child(11) { grid-area: 6 / 1; } /* Spondylolysis */
+    #grid-p3 .cb-cell:nth-child(12) { grid-area: 2 / 4; } /* Rupture / Tear */
+    #grid-p3 .cb-cell:nth-child(13) { grid-area: 7 / 1; } /* Spondylolisthesis */
+    #grid-p3 .cb-cell:nth-child(14) { grid-area: 3 / 4; } /* Meniscus Injury */
+    #grid-p3 .cb-cell:nth-child(15) { grid-area: 1 / 2; } /* Kyphosis */
+    #grid-p3 .cb-cell:nth-child(16) { grid-area: 4 / 4; } /* ACL / Ligament Injury */
+    #grid-p3 .cb-cell:nth-child(17) { grid-area: 2 / 2; } /* Lordosis */
+    #grid-p3 .cb-cell:nth-child(18) { grid-area: 5 / 4; } /* Sprain / Strain */
+    #grid-p3 .cb-cell:nth-child(19) { grid-area: 3 / 2; } /* Scoliosis */
+    #grid-p3 .cb-cell:nth-child(20) { grid-area: 6 / 4; } /* Fracture */
+    #grid-p3 .cb-cell:nth-child(21) { grid-area: 4 / 2; } /* Tendinopathy */
+    #grid-p3 .cb-cell:nth-child(22) { grid-area: 7 / 4; } /* Bone Marrow Edema */
+    #grid-p3 .cb-cell:nth-child(23) { grid-area: 5 / 2; } /* Tendonitis */
+    #grid-p3 .cb-cell:nth-child(24) { grid-area: 1 / 5; } /* Muscle Strains / Tears */
+    #grid-p3 .cb-cell:nth-child(25) { grid-area: 6 / 2; } /* Calcific Tendinitis */
+    #grid-p3 .cb-cell:nth-child(26) { grid-area: 2 / 5; } /* Muscle Cramps */
+    #grid-p3 .cb-cell:nth-child(27) { grid-area: 7 / 2; } /* Epicondylitis (Tennis Elbow) */
+    #grid-p3 .cb-cell:nth-child(28) { grid-area: 3 / 5; } /* Flat Feet */
+    #grid-p3 .cb-cell:nth-child(29) { grid-area: 1 / 3; } /* Frozen Shoulder */
+    #grid-p3 .cb-cell:nth-child(30) { grid-area: 4 / 5; } /* Plantar Fasciitis */
+    #grid-p3 .cb-cell:nth-child(31) { grid-area: 2 / 3; } /* Carpal Tunnel Syndrome */
+    #grid-p3 .cb-cell:nth-child(32) { grid-area: 5 / 5; } /* Heel Spur */
+    #grid-p3 .cb-cell:nth-child(33) { grid-area: 3 / 3; } /* Thoracic Outlet Syndrome */
+    #grid-p3 .cb-cell:nth-child(34) { grid-area: 6 / 5; } /* Bunion / Hallux Valgus */
+    #grid-p3 .cb-cell:nth-child(35) { grid-area: 7 / 5; } /* Other Condition or Injury */
+  }
 
   .note { font-size: 10.5px; color: #666; font-style: italic; margin: 4px 0 6px; line-height: 1.5; }
 
@@ -61,8 +171,11 @@
 
   .habits-list { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
   .habit-item { display: flex; align-items: flex-start; gap: 8px; }
+  /* Checkbox + label travel together as one flex item, so a long label can
+     never wrap away from its own checkbox when the row runs out of space. */
+  .habit-check { display: flex; align-items: flex-start; gap: 8px; }
   .habit-item input[type="checkbox"] { margin-top: 3px; width: 14px; height: 14px; accent-color: #4a4a8a; flex-shrink: 0; }
-  .habit-item .habit-label { font-size: 12.5px; white-space: nowrap; }
+  .habit-item .habit-label { font-size: 12.5px; }
   .habit-item input[type="text"] { border: 1.5px solid #c8c8e8; border-radius: 5px; padding: 4px 8px; font-size: 12px; font-family: inherit; background: #f8f8fd; flex: 1; }
 
   .bullet-section { margin-bottom: 12px; }
@@ -97,39 +210,49 @@
   @media (max-width: 700px) {
     .fields-grid { grid-template-columns: 1fr; }
 
-    /* cols-4: use CSS columns so desktop col1+col2 = mobile col1, desktop col3+col4 = mobile col2 */
-    .cb-grid.cols-4 {
-      display: block;
-      column-count: 2;
-      column-gap: 0;
+    /* cols-4 (section 1) on mobile: same mechanism as the Greek reference
+       file — a JS reorder (see the script near the end of the body) reflows
+       the 4-column desktop grid into 2 mobile columns using the CSS `order`
+       property, then tags each cell .mobile-left / .mobile-right so the
+       right border can be drawn on the correct side of each pair regardless
+       of where that cell originally sat in the 4-column grid. */
+    .cb-grid.cols-4 { grid-template-columns: repeat(2, 1fr); }
+    .cb-cell.mobile-right {
+      border-right: none !important;
     }
-    .cols-4 .cb-cell {
-      display: flex;
-      break-inside: avoid;
-      -webkit-column-break-inside: avoid;
-      border-right: 1px solid #d0d0e8;
-      border-bottom: 1px solid #d0d0e8;
-      box-sizing: border-box;
-      width: 100%;
+    .cb-cell.mobile-left {
+      border-right: 1px solid #d0d0e8 !important;
     }
-
-    /* cols-5: same approach */
-    .cb-grid.cols-5 {
-      display: block;
-      column-count: 2;
-      column-gap: 0;
-    }
-    .cols-5 .cb-cell {
-      display: flex;
-      break-inside: avoid;
-      -webkit-column-break-inside: avoid;
-      border-right: 1px solid #d0d0e8;
-      border-bottom: 1px solid #d0d0e8;
-      box-sizing: border-box;
-      width: 100%;
+    /* When the item count is odd, the very last item is alone in the final
+       row. Spanning it across both columns gives it a full-width border
+       like every other row, instead of leaving its right half open.
+       Desktop-only widths never see this rule — it's inside this mobile
+       media query specifically so its specificity can't fight the plain
+       nth-child(N) grid-area rule that places this same item within the
+       5-column desktop layout. */
+    #grid-p2 .cb-cell:last-child:nth-child(odd),
+    #grid-p3 .cb-cell:last-child:nth-child(odd) {
+      grid-column: 1 / -1 !important;
     }
     .sig-wrapper { grid-template-columns: 1fr; }
     .habit-item { flex-wrap: wrap; }
+    /* Force the detail input onto its own full-width line every time,
+       instead of leaving it to flex-wrap to sometimes squeeze into
+       whatever space is left at the end of the label's last line. */
+    .habit-item input[type="text"] { flex: 1 1 100%; width: 100%; }
+  }
+
+  @media (max-width: 700px) {
+    /* Fix mobile reordered grid borders */
+    .cb-grid.cols-4 .cb-cell {
+      border-bottom: 1px solid #d0d0e8 !important;
+    }
+    .cb-grid.cols-4 .cb-cell.mobile-right {
+      border-right: none !important;
+    }
+    .cb-grid.cols-4 .cb-cell.mobile-left {
+      border-right: 1px solid #d0d0e8 !important;
+    }
   }
 </style>
 </head>
@@ -218,31 +341,31 @@
   <div class="section">
     <div class="section-title">2. Autoimmune &amp; Neurological Conditions</div>
     <p class="note">Please select all that apply:</p>
-    <div class="cb-grid cols-5">
+    <div id="grid-p2">
       <label class="cb-cell"><input type="checkbox" name="p2" value="Autoimmune Thyroid Diseases (Hashimoto's / Graves' Disease)"> Autoimmune Thyroid Diseases (Hashimoto's / Graves' Disease)</label>
-      <label class="cb-cell"><input type="checkbox" name="p2" value="Systemic Lupus Erythematosus (SLE)"> Systemic Lupus Erythematosus (SLE)</label>
-      <label class="cb-cell"><input type="checkbox" name="p2" value="Psoriasis"> Psoriasis</label>
-      <label class="cb-cell"><input type="checkbox" name="p2" value="Stroke"> Stroke</label>
-      <label class="cb-cell"><input type="checkbox" name="p2" value="Neuralgia"> Neuralgia</label>
-      <label class="cb-cell"><input type="checkbox" name="p2" value="Multiple Sclerosis (MS)"> Multiple Sclerosis (MS)</label>
-      <label class="cb-cell"><input type="checkbox" name="p2" value="Scleroderma"> Scleroderma</label>
-      <label class="cb-cell"><input type="checkbox" name="p2" value="Psoriatic Arthritis"> Psoriatic Arthritis</label>
-      <label class="cb-cell"><input type="checkbox" name="p2" value="Parkinson's Disease"> Parkinson's Disease</label>
-      <label class="cb-cell"><input type="checkbox" name="p2" value="Fibromyalgia"> Fibromyalgia</label>
-      <label class="cb-cell"><input type="checkbox" name="p2" value="Myasthenia Gravis"> Myasthenia Gravis</label>
-      <label class="cb-cell"><input type="checkbox" name="p2" value="Raynaud's Syndrome"> Raynaud's Syndrome</label>
       <label class="cb-cell"><input type="checkbox" name="p2" value="Rheumatoid Arthritis"> Rheumatoid Arthritis</label>
-      <label class="cb-cell"><input type="checkbox" name="p2" value="Alzheimer's Disease"> Alzheimer's Disease</label>
-      <label class="cb-cell"><input type="checkbox" name="p2" value="Migraines"> Migraines</label>
-      <label class="cb-cell"><input type="checkbox" name="p2" value="Addison's Disease"> Addison's Disease</label>
-      <label class="cb-cell"><input type="checkbox" name="p2" value="Sjögren's Syndrome"> Sjögren's Syndrome</label>
+      <label class="cb-cell"><input type="checkbox" name="p2" value="Multiple Sclerosis (MS)"> Multiple Sclerosis (MS)</label>
       <label class="cb-cell"><input type="checkbox" name="p2" value="Crohn's Disease"> Crohn's Disease</label>
-      <label class="cb-cell"><input type="checkbox" name="p2" value="Dementia"> Dementia</label>
-      <label class="cb-cell"><input type="checkbox" name="p2" value="Vertigo / Dizziness"> Vertigo / Dizziness</label>
-      <label class="cb-cell"><input type="checkbox" name="p2" value="Autoimmune Hepatitis"> Autoimmune Hepatitis</label>
-      <label class="cb-cell"><input type="checkbox" name="p2" value="Vitiligo"> Vitiligo</label>
+      <label class="cb-cell"><input type="checkbox" name="p2" value="Myasthenia Gravis"> Myasthenia Gravis</label>
       <label class="cb-cell"><input type="checkbox" name="p2" value="Ulcerative Colitis"> Ulcerative Colitis</label>
+      <label class="cb-cell"><input type="checkbox" name="p2" value="Addison's Disease"> Addison's Disease</label>
+      <label class="cb-cell"><input type="checkbox" name="p2" value="Stroke"> Stroke</label>
+      <label class="cb-cell"><input type="checkbox" name="p2" value="Autoimmune Hepatitis"> Autoimmune Hepatitis</label>
+      <label class="cb-cell"><input type="checkbox" name="p2" value="Parkinson's Disease"> Parkinson's Disease</label>
+      <label class="cb-cell"><input type="checkbox" name="p2" value="Systemic Lupus Erythematosus (SLE)"> Systemic Lupus Erythematosus (SLE)</label>
+      <label class="cb-cell"><input type="checkbox" name="p2" value="Alzheimer's Disease"> Alzheimer's Disease</label>
+      <label class="cb-cell"><input type="checkbox" name="p2" value="Scleroderma"> Scleroderma</label>
+      <label class="cb-cell"><input type="checkbox" name="p2" value="Dementia"> Dementia</label>
+      <label class="cb-cell"><input type="checkbox" name="p2" value="Raynaud's Syndrome"> Raynaud's Syndrome</label>
       <label class="cb-cell"><input type="checkbox" name="p2" value="Seizures / Epilepsy"> Seizures / Epilepsy</label>
+      <label class="cb-cell"><input type="checkbox" name="p2" value="Sjögren's Syndrome"> Sjögren's Syndrome</label>
+      <label class="cb-cell"><input type="checkbox" name="p2" value="Neuralgia"> Neuralgia</label>
+      <label class="cb-cell"><input type="checkbox" name="p2" value="Vitiligo"> Vitiligo</label>
+      <label class="cb-cell"><input type="checkbox" name="p2" value="Fibromyalgia"> Fibromyalgia</label>
+      <label class="cb-cell"><input type="checkbox" name="p2" value="Psoriasis"> Psoriasis</label>
+      <label class="cb-cell"><input type="checkbox" name="p2" value="Migraines"> Migraines</label>
+      <label class="cb-cell"><input type="checkbox" name="p2" value="Psoriatic Arthritis"> Psoriatic Arthritis</label>
+      <label class="cb-cell"><input type="checkbox" name="p2" value="Vertigo / Dizziness"> Vertigo / Dizziness</label>
       <label class="cb-cell"><input type="checkbox" name="p2" value="Other (Please specify)"> Other (Please specify)</label>
     </div>
     <p class="note">• For any option marked above, please provide details (frequency, date of diagnosis, severity, or current medication).</p>
@@ -253,41 +376,41 @@
   <div class="section">
     <div class="section-title">3. Musculoskeletal &amp; Orthopedic Conditions</div>
     <p class="note">Please select all that apply:</p>
-    <div class="cb-grid cols-5">
+    <div id="grid-p3">
       <label class="cb-cell"><input type="checkbox" name="p3" value="Cervicalgia / Neck Pain"> Cervicalgia / Neck Pain</label>
-      <label class="cb-cell"><input type="checkbox" name="p3" value="Kyphosis"> Kyphosis</label>
-      <label class="cb-cell"><input type="checkbox" name="p3" value="Frozen Shoulder"> Frozen Shoulder</label>
-      <label class="cb-cell"><input type="checkbox" name="p3" value="Baker's Cyst"> Baker's Cyst</label>
-      <label class="cb-cell"><input type="checkbox" name="p3" value="Muscle Strains / Tears"> Muscle Strains / Tears</label>
-      <label class="cb-cell"><input type="checkbox" name="p3" value="Lumbar Pain / Low Back Pain"> Lumbar Pain / Low Back Pain</label>
-      <label class="cb-cell"><input type="checkbox" name="p3" value="Lordosis"> Lordosis</label>
-      <label class="cb-cell"><input type="checkbox" name="p3" value="Carpal Tunnel Syndrome"> Carpal Tunnel Syndrome</label>
-      <label class="cb-cell"><input type="checkbox" name="p3" value="Rupture / Tear"> Rupture / Tear</label>
-      <label class="cb-cell"><input type="checkbox" name="p3" value="Muscle Cramps"> Muscle Cramps</label>
-      <label class="cb-cell"><input type="checkbox" name="p3" value="Sciatica"> Sciatica</label>
-      <label class="cb-cell"><input type="checkbox" name="p3" value="Scoliosis"> Scoliosis</label>
-      <label class="cb-cell"><input type="checkbox" name="p3" value="Thoracic Outlet Syndrome"> Thoracic Outlet Syndrome</label>
-      <label class="cb-cell"><input type="checkbox" name="p3" value="Meniscus Injury"> Meniscus Injury</label>
-      <label class="cb-cell"><input type="checkbox" name="p3" value="Flat Feet"> Flat Feet</label>
-      <label class="cb-cell"><input type="checkbox" name="p3" value="Hernia (Disc Herniation, Inguinal Hernia)"> Hernia (Disc Herniation, Inguinal Hernia)</label>
-      <label class="cb-cell"><input type="checkbox" name="p3" value="Tendinopathy"> Tendinopathy</label>
       <label class="cb-cell"><input type="checkbox" name="p3" value="Trochanteric Bursitis"> Trochanteric Bursitis</label>
-      <label class="cb-cell"><input type="checkbox" name="p3" value="ACL / Ligament Injury"> ACL / Ligament Injury</label>
-      <label class="cb-cell"><input type="checkbox" name="p3" value="Plantar Fasciitis"> Plantar Fasciitis</label>
-      <label class="cb-cell"><input type="checkbox" name="p3" value="Spinal Stenosis"> Spinal Stenosis</label>
-      <label class="cb-cell"><input type="checkbox" name="p3" value="Tendonitis"> Tendonitis</label>
+      <label class="cb-cell"><input type="checkbox" name="p3" value="Lumbar Pain / Low Back Pain"> Lumbar Pain / Low Back Pain</label>
       <label class="cb-cell"><input type="checkbox" name="p3" value="Osteoarthritis"> Osteoarthritis</label>
-      <label class="cb-cell"><input type="checkbox" name="p3" value="Sprain / Strain"> Sprain / Strain</label>
-      <label class="cb-cell"><input type="checkbox" name="p3" value="Heel Spur"> Heel Spur</label>
-      <label class="cb-cell"><input type="checkbox" name="p3" value="Spondylolysis"> Spondylolysis</label>
-      <label class="cb-cell"><input type="checkbox" name="p3" value="Calcific Tendinitis"> Calcific Tendinitis</label>
+      <label class="cb-cell"><input type="checkbox" name="p3" value="Sciatica"> Sciatica</label>
       <label class="cb-cell"><input type="checkbox" name="p3" value="Joint Replacement / Arthroplasty"> Joint Replacement / Arthroplasty</label>
-      <label class="cb-cell"><input type="checkbox" name="p3" value="Fracture"> Fracture</label>
-      <label class="cb-cell"><input type="checkbox" name="p3" value="Bunion / Hallux Valgus"> Bunion / Hallux Valgus</label>
-      <label class="cb-cell"><input type="checkbox" name="p3" value="Spondylolisthesis"> Spondylolisthesis</label>
-      <label class="cb-cell"><input type="checkbox" name="p3" value="Epicondylitis (Tennis Elbow)"> Epicondylitis (Tennis Elbow)</label>
+      <label class="cb-cell"><input type="checkbox" name="p3" value="Hernia (Disc Herniation, Inguinal Hernia)"> Hernia (Disc Herniation, Inguinal Hernia)</label>
       <label class="cb-cell"><input type="checkbox" name="p3" value="Chondropathy"> Chondropathy</label>
+      <label class="cb-cell"><input type="checkbox" name="p3" value="Spinal Stenosis"> Spinal Stenosis</label>
+      <label class="cb-cell"><input type="checkbox" name="p3" value="Baker's Cyst"> Baker's Cyst</label>
+      <label class="cb-cell"><input type="checkbox" name="p3" value="Spondylolysis"> Spondylolysis</label>
+      <label class="cb-cell"><input type="checkbox" name="p3" value="Rupture / Tear"> Rupture / Tear</label>
+      <label class="cb-cell"><input type="checkbox" name="p3" value="Spondylolisthesis"> Spondylolisthesis</label>
+      <label class="cb-cell"><input type="checkbox" name="p3" value="Meniscus Injury"> Meniscus Injury</label>
+      <label class="cb-cell"><input type="checkbox" name="p3" value="Kyphosis"> Kyphosis</label>
+      <label class="cb-cell"><input type="checkbox" name="p3" value="ACL / Ligament Injury"> ACL / Ligament Injury</label>
+      <label class="cb-cell"><input type="checkbox" name="p3" value="Lordosis"> Lordosis</label>
+      <label class="cb-cell"><input type="checkbox" name="p3" value="Sprain / Strain"> Sprain / Strain</label>
+      <label class="cb-cell"><input type="checkbox" name="p3" value="Scoliosis"> Scoliosis</label>
+      <label class="cb-cell"><input type="checkbox" name="p3" value="Fracture"> Fracture</label>
+      <label class="cb-cell"><input type="checkbox" name="p3" value="Tendinopathy"> Tendinopathy</label>
       <label class="cb-cell"><input type="checkbox" name="p3" value="Bone Marrow Edema"> Bone Marrow Edema</label>
+      <label class="cb-cell"><input type="checkbox" name="p3" value="Tendonitis"> Tendonitis</label>
+      <label class="cb-cell"><input type="checkbox" name="p3" value="Muscle Strains / Tears"> Muscle Strains / Tears</label>
+      <label class="cb-cell"><input type="checkbox" name="p3" value="Calcific Tendinitis"> Calcific Tendinitis</label>
+      <label class="cb-cell"><input type="checkbox" name="p3" value="Muscle Cramps"> Muscle Cramps</label>
+      <label class="cb-cell"><input type="checkbox" name="p3" value="Epicondylitis (Tennis Elbow)"> Epicondylitis (Tennis Elbow)</label>
+      <label class="cb-cell"><input type="checkbox" name="p3" value="Flat Feet"> Flat Feet</label>
+      <label class="cb-cell"><input type="checkbox" name="p3" value="Frozen Shoulder"> Frozen Shoulder</label>
+      <label class="cb-cell"><input type="checkbox" name="p3" value="Plantar Fasciitis"> Plantar Fasciitis</label>
+      <label class="cb-cell"><input type="checkbox" name="p3" value="Carpal Tunnel Syndrome"> Carpal Tunnel Syndrome</label>
+      <label class="cb-cell"><input type="checkbox" name="p3" value="Heel Spur"> Heel Spur</label>
+      <label class="cb-cell"><input type="checkbox" name="p3" value="Thoracic Outlet Syndrome"> Thoracic Outlet Syndrome</label>
+      <label class="cb-cell"><input type="checkbox" name="p3" value="Bunion / Hallux Valgus"> Bunion / Hallux Valgus</label>
       <label class="cb-cell"><input type="checkbox" name="p3" value="Other Condition or Injury"> Other Condition or Injury</label>
     </div>
     <p class="note">• For any option marked above, please provide specific details (e.g., location, date of injury/diagnosis, severity, or treatment).<br>
@@ -347,33 +470,45 @@
     <div class="section-title">9. Daily Habits &amp; Medication</div>
     <div class="habits-list">
       <div class="habit-item">
-        <input type="checkbox" id="h_smok" name="h" value="Smoking">
-        <span class="habit-label"><label for="h_smok">Smoking</label> — Frequency:</span>
+        <div class="habit-check">
+          <input type="checkbox" id="h_smok" name="h" value="Smoking">
+          <span class="habit-label"><label for="h_smok">Smoking</label> — Frequency:</span>
+        </div>
         <input type="text" id="h_smok_d" placeholder="e.g. 10 cigarettes/day">
       </div>
       <div class="habit-item">
-        <input type="checkbox" id="h_alc" name="h" value="Alcohol">
-        <span class="habit-label"><label for="h_alc">Alcohol</label> — Frequency:</span>
+        <div class="habit-check">
+          <input type="checkbox" id="h_alc" name="h" value="Alcohol">
+          <span class="habit-label"><label for="h_alc">Alcohol</label> — Frequency:</span>
+        </div>
         <input type="text" id="h_alc_d" placeholder="e.g. 2-3 times/week">
       </div>
       <div class="habit-item">
-        <input type="checkbox" id="h_med" name="h" value="Medication">
-        <span class="habit-label"><label for="h_med">Medication</label> — Which medications &amp; for what reason:</span>
+        <div class="habit-check">
+          <input type="checkbox" id="h_med" name="h" value="Medication">
+          <span class="habit-label"><label for="h_med">Medication</label> — Which medications &amp; for what reason:</span>
+        </div>
         <input type="text" id="h_med_d" placeholder="">
       </div>
       <div class="habit-item">
-        <input type="checkbox" id="h_inj" name="h" value="Injectable Medications / Treatments">
-        <span class="habit-label"><label for="h_inj">Injectable Medications / Treatments</label> (e.g. Mounjaro, Ozempic, cosmetic injections):</span>
+        <div class="habit-check">
+          <input type="checkbox" id="h_inj" name="h" value="Injectable Medications / Treatments">
+          <span class="habit-label"><label for="h_inj">Injectable Medications / Treatments</label> (e.g. Mounjaro, Ozempic, cosmetic injections):</span>
+        </div>
         <input type="text" id="h_inj_d" placeholder="">
       </div>
       <div class="habit-item">
-        <input type="checkbox" id="h_vit" name="h" value="Vitamins / Dietary Supplements">
-        <span class="habit-label"><label for="h_vit">Vitamins / Dietary Supplements</label> — Details:</span>
+        <div class="habit-check">
+          <input type="checkbox" id="h_vit" name="h" value="Vitamins / Dietary Supplements">
+          <span class="habit-label"><label for="h_vit">Vitamins / Dietary Supplements</label> — Details:</span>
+        </div>
         <input type="text" id="h_vit_d" placeholder="">
       </div>
       <div class="habit-item">
-        <input type="checkbox" id="h_sub" name="h" value="Substance Use">
-        <span class="habit-label"><label for="h_sub">Substance Use:</label></span>
+        <div class="habit-check">
+          <input type="checkbox" id="h_sub" name="h" value="Substance Use">
+          <span class="habit-label"><label for="h_sub">Substance Use:</label></span>
+        </div>
         <input type="text" id="h_sub_d" placeholder="">
       </div>
     </div>
@@ -573,6 +708,58 @@
       btn.disabled = false; btn.textContent = '📨 Submit Form';
     }
   }
+</script>
+
+<script>
+(function() {
+  function reorder() {
+    var mobile = window.innerWidth <= 700;
+
+    document.querySelectorAll('.cb-grid.cols-4').forEach(function(grid) {
+      var cells = grid.querySelectorAll('.cb-cell');
+
+      cells.forEach(function(cell, i) {
+        if (mobile) {
+          var row = Math.floor(i / 4);
+          var col = i % 4;
+
+          // Mobile order:
+          // Desktop columns 1 + 3 first
+          // Desktop columns 2 + 4 afterwards
+          var visualOrder = 0;
+
+          if (col === 0) visualOrder = row * 2;
+          if (col === 2) visualOrder = row * 2 + 1;
+          if (col === 1) visualOrder = 1000 + row * 2;
+          if (col === 3) visualOrder = 1000 + row * 2 + 1;
+
+          cell.style.order = visualOrder;
+
+          cell.classList.remove('mobile-left','mobile-right');
+          if (visualOrder % 2 === 0) {
+            cell.classList.add('mobile-left');
+          } else {
+            cell.classList.add('mobile-right');
+          }
+
+        } else {
+          cell.style.order = '';
+          cell.classList.remove('mobile-left','mobile-right');
+        }
+      });
+
+      grid.style.gridTemplateColumns = mobile ? 'repeat(2, 1fr)' : '';
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', reorder);
+  } else {
+    reorder();
+  }
+
+  window.addEventListener('resize', reorder);
+})();
 </script>
 </body>
 </html>
