@@ -259,6 +259,8 @@
   .invalid { border-color: #c0392b !important; background: #fdf1f0 !important; box-shadow: 0 0 0 2px rgba(192,57,43,0.15); }
   .consent-row.invalid { border-color: #c0392b !important; }
   .hpx { position: absolute !important; left: -10000px !important; top: auto; width: 1px; height: 1px; overflow: hidden; }
+  .btn-edit { background: #fff; color: #2d2d6b; border: 1.5px solid #2d2d6b; border-radius: 6px; padding: 10px 26px; font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; }
+  .btn-edit:hover { background: #f0f0fa; }
 </style>
 </head>
 <body>
@@ -587,6 +589,10 @@
   <!-- SUBMIT -->
   <div class="action-bar">
     <button class="btn-submit" id="submitBtn" onclick="submitForm()">📨 Submit Form</button>
+    <div id="editBox" style="display:none;margin-top:12px;">
+      <div class="submit-note" id="editNote" style="margin-bottom:8px;"></div>
+      <button type="button" class="btn-edit" id="editBtn" onclick="startEdit()">✏️ Correct my details</button>
+    </div>
     <div class="submit-note">The form will be automatically uploaded to Google Drive</div>
   </div>
 
@@ -699,6 +705,25 @@
     return c2.toDataURL('image/png');
   }
 
+  // ── Διόρθωση μετά την αποστολή ──
+  let editToken = null, editTimer = null;
+  function showEditOption(min) {
+    document.getElementById('editNote').textContent = 'Made a mistake? You can correct it within the next ' + min + ' minutes. You will need to sign again.';
+    document.getElementById('editBox').style.display = 'block';
+    clearTimeout(editTimer);
+    editTimer = setTimeout(() => {          // μετά το χρονικό όριο το κουμπί εξαφανίζεται
+      document.getElementById('editBox').style.display = 'none';
+    }, min * 60 * 1000);
+  }
+  function startEdit() {
+    clearSig();                              // νέα υπογραφή για το διορθωμένο έντυπο
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = false; btn.textContent = '📨 Submit corrected form';
+    document.getElementById('editBox').style.display = 'none';
+    showToast('✏️ Make your changes, sign again and press “Submit”.', false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   async function submitForm() {
     const onoma = document.getElementById('f_onoma').value.trim();
     // ── Έλεγχος υποχρεωτικών πεδίων ──
@@ -757,6 +782,7 @@
       params.fdate = document.getElementById('f_date').value || '';
 
       params.action = 'submit';
+      params.editToken = editToken || '';
       params.hp = document.getElementById('x_note_7q').value;
       params.t = Date.now() - FORM_LOADED_AT;
       params.sig = hasSig ? signatureDataURL() : '';
@@ -780,8 +806,11 @@
       }
       if (!result || result.ok !== true) throw new Error((result && result.error) || 'Unknown error');
 
-      showToast('✅ Your form was saved successfully!', false);
+      const wasEdit = !!editToken;
+      editToken = result.editToken || null;
+      showToast(!wasEdit ? '✅ Your form was saved successfully!' : (result.replaced ? '✅ Your corrected form was saved!' : '✅ Saved as a new form (the correction window had expired).'), false);
       btn.textContent = '✅ Submitted!';
+      if (editToken) showEditOption(result.editMinutes || 30);
 
     } catch(err) {
       console.error(err);
