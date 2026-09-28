@@ -276,7 +276,7 @@
     <div class="section-title">Personal Information</div>
     <div class="fields-grid">
       <div class="field-group"><label>Full Name <span class="req">*</span></label><input type="text" id="f_onoma" placeholder="First Last Name"></div>
-      <div class="field-group"><label>Occupation</label><input type="text" id="f_epag"></div>
+      <div class="field-group"><label>Occupation <span class="req">*</span></label><input type="text" id="f_epag"></div>
       <div class="field-group">
         <label>Date of Birth <span class="req">*</span></label>
         <div style="display:flex;gap:6px;">
@@ -291,9 +291,9 @@
           </select>
         </div>
       </div>
-      <div class="field-group"><label>Address &amp; Area</label><input type="text" id="f_dieu"></div>
+      <div class="field-group"><label>Address &amp; Area <span class="req">*</span></label><input type="text" id="f_dieu"></div>
       <div class="field-group"><label>Contact Phone <span class="req">*</span></label><input type="tel" id="f_til" placeholder="e.g. +30 6971234567"></div>
-      <div class="field-group"><label>Email</label><input type="email" id="f_email"></div>
+      <div class="field-group"><label>Email <span class="req">*</span></label><input type="email" id="f_email"></div>
       <div class="field-group" style="grid-column:1/-1;"><label>Emergency Contact (ICE) — Name / Phone <span class="req">*</span></label><input type="text" id="f_ice" placeholder="e.g. Maria Papadopoulou +30 6981234567"></div>
     </div>
   </div>
@@ -525,7 +525,7 @@
   <!-- SECTION 10 -->
   <div class="section">
     <div class="bullet-section">
-      <p></p><div class="section-title">10. Personal Goals</div><p style="font-size:12px;color:#555;margin-bottom:5px;">What brought you to our studio and what are your main goals from participating in our programs? What would you like to improve or facilitate in your daily life? (e.g., strengthening, injury rehabilitation, posture correction, well-being, etc.):</p>
+      <p></p><div class="section-title">10. Personal Goals <span class="req">*</span></div><p style="font-size:12px;color:#555;margin-bottom:5px;">What brought you to our studio and what are your main goals from participating in our programs? What would you like to improve or facilitate in your daily life? (e.g., strengthening, injury rehabilitation, posture correction, well-being, etc.):</p>
       <textarea id="f_velt" rows="3"></textarea>
     </div>
   </div>
@@ -533,7 +533,7 @@
   <!-- SECTION 11 -->
   <div class="section">
     <div class="bullet-section">
-      <p></p><div class="section-title">11. How Did You Hear About Our Studio?</div><p style="font-size:12px;color:#555;margin-bottom:5px;">e.g., Social Media, Google, walk-in/signage, recommended by a friend/acquaintance:</p>
+      <p></p><div class="section-title">11. How Did You Hear About Our Studio? <span class="req">*</span></div><p style="font-size:12px;color:#555;margin-bottom:5px;">e.g., Social Media, Google, walk-in/signage, recommended by a friend/acquaintance:</p>
       <textarea id="f_pos" rows="2"></textarea>
     </div>
   </div>
@@ -664,13 +664,19 @@
   function digitsOf(v) { return (v || '').replace(/\D/g, '').length; }
   function checkRequired(names) {
     const $ = id => document.getElementById(id);
+    const filled = (id, n) => $(id).value.trim().length >= (n || 2);
     const checks = [
-      ['onoma',   [$('f_onoma')],                        () => $('f_onoma').value.trim().length >= 3],
+      ['onoma',   [$('f_onoma')],                        () => filled('f_onoma', 3)],
+      ['epag',    [$('f_epag')],                         () => filled('f_epag')],
       ['dob',     [$('f_dob_d'), $('f_dob_m'), $('f_dob_y')], () => $('f_dob_d').value && $('f_dob_m').value && $('f_dob_y').value],
+      ['dieu',    [$('f_dieu')],                         () => filled('f_dieu', 3)],
       ['til',     [$('f_til')],                          () => digitsOf($('f_til').value) >= 8],
+      ['email',   [$('f_email')],                        () => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test($('f_email').value.trim())],
       ['ice',     [$('f_ice')],                          () => digitsOf($('f_ice').value) >= 8 && /[A-Za-zΑ-Ωα-ωΆ-Ώά-ώ]/.test($('f_ice').value)],
-      ['sig',     [document.querySelector('.sig-container')], () => hasSig],
-      ['consent', [document.querySelector('.consent-row')],   () => $('consent').checked]
+      ['velt',    [$('f_velt')],                         () => filled('f_velt', 3)],
+      ['pos',     [$('f_pos')],                          () => filled('f_pos')],
+      ['consent', [document.querySelector('.consent-row')],   () => $('consent').checked],
+      ['sig',     [document.querySelector('.sig-container')], () => hasSig]
     ];
     const missing = []; let first = null;
     checks.forEach(([key, els, ok]) => {
@@ -767,8 +773,10 @@
     const onoma = document.getElementById('f_onoma').value.trim();
     // ── Έλεγχος υποχρεωτικών πεδίων ──
     const missing = checkRequired({
-      onoma: 'Full Name', dob: 'Date of Birth', til: 'Phone (at least 8 digits)',
-      ice: 'Emergency Contact — name and phone', sig: 'Signature', consent: 'Acceptance of terms'
+      onoma: 'Full Name', epag: 'Occupation', dob: 'Date of Birth', dieu: 'Address & Area',
+      til: 'Phone (at least 8 digits)', email: 'Email (valid address)',
+      ice: 'Emergency Contact — name and phone', velt: 'Personal Goals',
+      pos: 'How you heard about the studio', consent: 'Acceptance of terms', sig: 'Signature'
     });
     if (missing.length) { showToast('⚠️ Please complete: ' + missing.join(', '), true); return; }
 
@@ -821,6 +829,7 @@
       params.fdate = document.getElementById('f_date').value || '';
 
       params.action = 'submit';
+      params.consent = document.getElementById('consent').checked ? 'yes' : '';
       params.editToken = editToken || '';
       params.sid = newSubmissionId();   // ίδιος κωδικός σε όλες τις επαναλήψεις αυτής της αποστολής
       params.hp = document.getElementById('x_note_7q').value;
